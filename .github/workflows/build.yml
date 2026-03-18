@@ -7,19 +7,19 @@ on:
     branches: [ master ]
 
 env:
-  DOTNET_VERSION: 6.0.x
-  BICEP_VERSION: 0.22.6
+  DOTNET_VERSION: 10.0.x
+  BICEP_VERSION: 0.40.2
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-    - uses: actions/checkout@v4
-      with:
-        submodules: true
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
     - name: Use .NET ${{ env.DOTNET_VERSION }}
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # v5.2.0
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
@@ -29,10 +29,10 @@ jobs:
         az bicep install --version v${{ env.BICEP_VERSION }}
 
     - name: Build project
-      run: dotnet build -c Release
+      run: dotnet build -c Release ./src
 
     - name: Lint C# code
-      run: dotnet format --verify-no-changes --exclude ACMESharpCore --verbosity detailed --no-restore
+      run: dotnet format --verify-no-changes --verbosity detailed --no-restore ./src
 
     - name: Lint Bicep template
-      run: az bicep build -f azuredeploy.bicep && git diff --exit-code --quiet
+      run: az bicep build -f ./deploy/azuredeploy.bicep && git diff --exit-code --quiet
